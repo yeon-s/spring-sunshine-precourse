@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>날씨 조회할 도시를 영어로 입력해주세요.</h1>
+    <input id="cityInput">
+    <button id="searchWeather">조회</button>
+
+    <p id="result"></p>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script th:inline="javascript">
+
+        const weatherCodeMap = {
+            0: "맑음",
+            1: "거의 맑음",
+            2: "부분적으로 흐림",
+            3: "흐림",
+            45: "안개",
+            48: "어는 안개",
+            51: "이슬비(약)",
+            53: "이슬비(보통)",
+            55: "이슬비(강)",
+            56: "빙결 이슬비(약)",
+            57: "빙결 이슬비(강)",
+            61: "비(약)",
+            63: "비(보통)",
+            65: "비(강)",
+            66: "빙결 비(약)",
+            67: "빙결 비(강)",
+            71: "눈(약)",
+            73: "눈(보통)",
+            75: "눈(강)",
+            77: "눈 알갱이",
+            80: "소나기(약)",
+            81: "소나기(보통)",
+            82: "소나기(강)",
+            85: "눈 소나기(약)",
+            86: "눈 소나기(강)",
+            95: "천둥번개",
+            96: "우박 동반 천둥번개(약)",
+            99: "우박 동반 천둥번개(강)"
+        }
+
+    $("#searchWeather").on("click", function (e){
+        searchWeather();
+    });
+
+    function searchWeather() {
+        const city = document.getElementById("cityInput").value;
+
+        fetch('/api/search?city=' + city, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then((response) => {
+            if(!response.ok){
+                throw new Error("에러 발생");
+            }
+            return response.json();
+        }).then((data) => {
+
+            const current = data.current;
+
+            const temperatureUnit = data.current_units.temperature_2m;
+            const windSpeedUnit = data.current_units.wind_speed_10m;
+            const humidityUnit = data.current_units.relative_humidity_2m;
+
+            $("#result").text("현재 " + city + "의 기온은 " + current.temperature_2m + temperatureUnit +
+                "이며, 체감 온도는 " + current.apparent_temperature + temperatureUnit + "입니다. 습도는 " +
+                current.relative_humidity_2m + humidityUnit + "이고, 풍속은 " + current.wind_speed_10m + windSpeedUnit + "입니다. 날씨는 " +
+                weatherCodeMap[current.weather_code] + "입니다.");
+        })
+    }
+
+</script>
+</body>
+</html>
